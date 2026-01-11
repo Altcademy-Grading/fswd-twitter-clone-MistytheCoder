@@ -1,15 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-
-import './home.scss';
-
-const Home = props => (
-  <h1>Home page react is working</h1>
-)
+import App from '../src/App'
 
 document.addEventListener('DOMContentLoaded', () => {
   ReactDOM.render(
-    <Home />,
+    <App />,
     document.body.appendChild(document.createElement('div')),
   )
 })
