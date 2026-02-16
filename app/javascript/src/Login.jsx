@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const Login = (props) => {  // ← Accept props
+const Login = (props) => { 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -22,8 +22,8 @@ const Login = (props) => {  // ← Accept props
     })
     .then(res => res.json())
     .then(data => {
-      if (data.success) {  // Check if login succeeded
-        props.onLoginSuccess();  // ← Call the callback Home gave you
+      if (data.success) {   
+        props.onLoginSuccess();  
       }
     });
   };
