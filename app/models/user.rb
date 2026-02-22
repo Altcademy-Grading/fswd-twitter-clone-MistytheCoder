@@ -9,11 +9,22 @@ class User < ApplicationRecord
   validates_uniqueness_of :username
   validates_uniqueness_of :email
 
-  after_validation :hash_password
+  before_save :hash_password, if: :will_save_change_to_password?
+
+  def authenticate_password(raw_password)
+    return false if password.blank? || raw_password.blank?
+
+    ::BCrypt::Password.new(password) == raw_password
+  rescue ::BCrypt::Errors::InvalidHash
+    false
+  end
 
   private
 
   def hash_password
-    self.password = BCrypt::Password.create(password)
+    return if password.blank?
+
+    self.password = ::BCrypt::Password.create(password)
   end
+
 end

@@ -4,10 +4,43 @@ const Signup = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Signup data:", { username, email, password });
+    setMessage("");
+
+    fetch("/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        user: {
+          username,
+          email,
+          password,
+        },
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          const errors = Array.isArray(data.errors) ? data.errors.join(", ") : "Signup failed";
+          throw new Error(errors);
+        }
+        return data;
+      })
+      .then(() => {
+        setMessage("Signup successful. You can now log in.");
+        setUsername("");
+        setEmail("");
+        setPassword("");
+      })
+      .catch((err) => {
+        setMessage(err.message);
+      });
   };
 
   return (
@@ -42,6 +75,7 @@ const Signup = () => {
       </div>
 
       <button type="submit">Create Account</button>
+      {message && <p>{message}</p>}
     </form>
   );
 };

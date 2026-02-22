@@ -1,20 +1,27 @@
 module Api
   class SessionsController < ApplicationController
-    def create
-      @user = User.find_by(username: params[:user][:username])
+    skip_before_action :verify_authenticity_token
 
-      if @user && (BCrypt::Password.new(@user.password) == params[:user][:password])
-        session = @user.sessions.create
+    def create
+      username = params.dig(:user, :username)
+      password = params.dig(:user, :password)
+
+      @user = User.find_by(username: username)
+
+      if valid_login?(@user, password)
+        user_session = @user.sessions.create
         cookies.permanent.signed[:twitter_session_token] = {
-          value: session.token,
-          httponly: true
+          value: user_session.token,
+          httponly: true,
+          same_site: :lax
         }
 
-        render 'api/sessions/create'
+        render 'api/sessions/create', status: :ok
       else
         render json: {
-          success: false
-        }
+          success: false,
+          error: 'Invalid username or password'
+        }, status: :unauthorized
       end
     end
 
@@ -37,10 +44,19 @@ module Api
       session = Session.find_by(token: token)
 
       if session&.destroy
+        cookies.delete(:twitter_session_token)
         render json: {
           success: true
         }
       end
+    end
+
+    private
+
+    def valid_login?(user, raw_password)
+      return false if user.nil? || raw_password.blank?
+
+      user.authenticate_password(raw_password)
     end
   end
 end

@@ -8,15 +8,21 @@ const Home = () => {
   // 1. State: tracks whether the user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // 2. Check authentication on page load
-  useEffect(() => {
-    fetch("/api/authenticated")
-      .then(res => res.json())
-      .then(data => {
+  const checkAuthenticated = () => {
+    fetch("/api/authenticated", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
         console.log("Authenticated check:", data);
         setIsLoggedIn(data.authenticated);
       })
-      .catch(err => console.error("Auth check failed:", err));
+      .catch((err) => console.error("Auth check failed:", err));
+  };
+
+  // 2. Check authentication on page load
+  useEffect(() => {
+    checkAuthenticated();
   }, []);
 
   // 3. Conditional rendering
@@ -28,7 +34,7 @@ const Home = () => {
         <Feed />
       ) : (
         <>
-          <Login onLoginSuccess={() => setIsLoggedIn(true)} />
+          <Login onLoginSuccess={checkAuthenticated} />
           <Signup />
         </>
       )}

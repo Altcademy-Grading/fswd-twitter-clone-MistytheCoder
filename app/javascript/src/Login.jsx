@@ -3,9 +3,11 @@ import React, { useState } from "react";
 const Login = (props) => { 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError("");
     
     fetch('/api/sessions', {
       method: 'POST',
@@ -20,11 +22,22 @@ const Login = (props) => {
         }
       })
     })
-    .then(res => res.json())
+    .then(async (res) => {
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      return data;
+    })
     .then(data => {
       if (data.success) {   
         props.onLoginSuccess();  
       }
+    })
+    .catch((err) => {
+      setError(err.message);
     });
   };
 
@@ -49,6 +62,7 @@ const Login = (props) => {
       </div>
 
       <button type="submit">Log In</button>
+      {error && <p>{error}</p>}
     </form>
   );
 };
